@@ -5,44 +5,47 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     public Camera playerCamera;
-    Transform groundCheck;
-    LayerMask groundLayer;
-    float mouseSens { get; set; } = 400f;
-    float xRotation { get; set; } = 0f;
-    [SerializeField]
-    bool isGrounded = true;
-    [SerializeField]
-    bool isJumping = false;
-    Vector3 jumpVelo;
-    float sideToSide;
-    float fowardAndBack;
+    public Transform groundCheck;
+    public LayerMask groundLayer;
+    public CharacterController characterController;
+    public float mouseSens { get; set; } = 400f;
+    public float xRotation { get; set; } = 0f;
+    public bool isGrounded = true;
+    public bool isJumping = false;
+    public Vector3 jumpVelo;
+    public float sideToSide;
+    public float fowardAndBack;
+    public Vector3 movementVector = Vector3.zero;
 
     //ststs
-    float moveSpeed = 6f;
-    float gravity = -21f;
-    float normalGravity;
-    float strafeGravity = -2f;
-    float jumpHeight = 1.5f;
-    float dashSpeed;
+    public float moveSpeed = 6f;
+    public float gravity = -21f;
+    public float normalGravity;
+    public float jumpHeight = 1.5f;
 
     public void Start()
     {
-        normalGravity = gravity;
-        dashSpeed = 1.1f * moveSpeed;
         Cursor.lockState = CursorLockMode.Locked;
+        characterController.GetComponent<CharacterController>();
     }
     public void Update()
     {
-        //isGrounded = Physics.CheckSphere(groundCheck.position, .4f, groundLayer);
+        //Player Movement
+        isGrounded = Physics.CheckSphere(groundCheck.position, .4f, groundLayer);
         Movement();
         MouseMovement();
+        Jumping();
     }
+    //Player Movement
     public void Movement()
     {
         sideToSide = Input.GetAxis("Horizontal");
         fowardAndBack = Input.GetAxis("Vertical");
-        transform.Translate(new Vector3(sideToSide, 0, fowardAndBack) * moveSpeed * Time.deltaTime);
+        movementVector = transform.right * sideToSide + transform.forward * fowardAndBack;
+        characterController.Move(movementVector * moveSpeed * Time.deltaTime);
+
     }
+    //Camera Movement
     public void MouseMovement()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSens * Time.deltaTime;
@@ -51,5 +54,28 @@ public class PlayerMove : MonoBehaviour
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
         playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         this.gameObject.transform.Rotate(Vector3.up, mouseX);
+    }
+    //Jumping
+    public void Jumping()
+    {
+        bool jump = Input.GetKeyDown(KeyCode.Space);
+        if(jump && isGrounded)
+        {
+            isJumping = true;
+        }
+        else
+        {
+            isJumping = false;
+        }
+        if(isGrounded && jumpVelo.y < 0)
+        {
+            jumpVelo.y = -2f;
+        }
+        if (isJumping)
+        {
+            jumpVelo.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+        jumpVelo.y += gravity * Time.deltaTime;
+        characterController.Move(jumpVelo * Time.deltaTime);
     }
 }
