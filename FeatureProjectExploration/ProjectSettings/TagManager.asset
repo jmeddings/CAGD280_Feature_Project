@@ -8,6 +8,7 @@ TagManager:
   - Smoke
   - SmokeProjectile
   - Enemy
+  - KnifeProjectile
   layers:
   - Default
   - TransparentFX

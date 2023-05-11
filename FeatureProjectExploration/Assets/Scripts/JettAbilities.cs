@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class JettAbilities : MonoBehaviour
 {
@@ -14,21 +15,43 @@ public class JettAbilities : MonoBehaviour
     float dashSpeed = 30f;
     int dashAttempts;
     float dashStartTime;
+
+    public int totalKnives = 5;
+    float shootCooldown = 0.1f;
+    float shootForce = 100f;
+    float shootUpwardForce;
+
+    KeyCode leftShootKey = KeyCode.Mouse0;
+    KeyCode rightShootKey = KeyCode.Mouse1;
+
     [SerializeField]
     bool isDashing;
     [SerializeField]
     bool isThrowingSmoke = false;
+    [SerializeField]
+    bool readyToThrow = false;
 
+    public GameObject knifeProjectile;
     public GameObject smokeProjectile;
     public GameObject smokeFireTransform;
     public Camera playerCamera;
+    public GameObject attackPoint1;
+    public GameObject attackPoint2;
+    public GameObject attackPoint3;
+    public GameObject attackPoint4;
+    public GameObject attackPoint5;
 
     SmokeProjectile currentSmokeProjectile;
     float lastTimeSmokeEnded = 0f;
     float smokeDelaySeconds = 0.5f;
-
     public void Start()
     {
+        attackPoint1.SetActive(false);
+        attackPoint2.SetActive(false);
+        attackPoint3.SetActive(false);
+        attackPoint4.SetActive(false);
+        attackPoint5.SetActive(false);
+        readyToThrow = false;
         normalGravity = pm.gravity;
         pm.GetComponent<PlayerMove>();
         characterController.GetComponent<CharacterController>();
@@ -39,6 +62,7 @@ public class JettAbilities : MonoBehaviour
         SlowFall();
         Dash();
         Smoke();
+        Shoot();
     }
     #region Updraft & Float
     //Updraft or Q
@@ -156,6 +180,155 @@ public class JettAbilities : MonoBehaviour
         isThrowingSmoke = false;
         currentSmokeProjectile.SetIsControlled(false);
         currentSmokeProjectile = null;
+    }
+    #endregion
+    #region Knives
+
+    public void Shoot()
+    {
+
+        bool knivesOn = Input.GetKeyDown(KeyCode.X);
+        if (knivesOn && !readyToThrow)
+        {
+            MoreKnives();
+            attackPoint1.SetActive(true);
+            attackPoint2.SetActive(true);
+            attackPoint3.SetActive(true);
+            attackPoint4.SetActive(true);
+            attackPoint5.SetActive(true);
+            readyToThrow = true;
+        }
+        bool knivesOff = Input.GetKey(KeyCode.Z);
+        if (knivesOff && readyToThrow)
+        {
+            attackPoint1.SetActive(false);
+            attackPoint2.SetActive(false);
+            attackPoint3.SetActive(false);
+            attackPoint4.SetActive(false);
+            attackPoint5.SetActive(false);
+            readyToThrow = false;
+            MoreKnives();
+        }
+        if (Input.GetKeyDown(leftShootKey) && readyToThrow && totalKnives > 4)
+        {
+            shootKnife1();
+
+        }
+        else if(Input.GetKeyDown(leftShootKey) && readyToThrow && totalKnives > 3)
+        {
+            shootKnife2();
+
+        }
+        else if (Input.GetKeyDown(leftShootKey) && readyToThrow && totalKnives > 2)
+        {
+            shootKnife3();
+
+        }
+        else if (Input.GetKeyDown(leftShootKey) && readyToThrow && totalKnives > 1)
+        {
+            shootKnife4();
+
+        }
+        else if (Input.GetKeyDown(leftShootKey) && readyToThrow && totalKnives > 0)
+        {
+            shootKnife5();
+
+        }
+        if(Input.GetKeyDown(rightShootKey)&& readyToThrow && totalKnives > 0)
+        {
+            ScatterShot();
+        }
+    }
+    public void shootKnife1()
+    {
+        readyToThrow = false;
+        GameObject _projectile = Instantiate((knifeProjectile), attackPoint1.transform.position, playerCamera.transform.rotation);
+        Rigidbody _projectileRB = _projectile.GetComponent<Rigidbody>();
+        Vector3 forceToAdd = playerCamera.transform.forward * shootForce + transform.up * shootUpwardForce;
+        _projectileRB.AddForce(forceToAdd, ForceMode.Impulse);
+        totalKnives--;
+        Invoke(nameof(ResetKnife), shootCooldown);
+        attackPoint1.SetActive(false);
+    }
+    public void shootKnife2()
+    {
+        readyToThrow = false;
+        GameObject _projectile = Instantiate((knifeProjectile), attackPoint2.transform.position, playerCamera.transform.rotation);
+        Rigidbody _projectileRB = _projectile.GetComponent<Rigidbody>();
+        Vector3 forceToAdd = playerCamera.transform.forward * shootForce + transform.up * shootUpwardForce;
+        _projectileRB.AddForce(forceToAdd, ForceMode.Impulse);
+        totalKnives--;
+        Invoke(nameof(ResetKnife), shootCooldown);
+        attackPoint2.SetActive(false);
+    }
+    public void shootKnife3()
+    {
+        readyToThrow = false;
+        GameObject _projectile = Instantiate((knifeProjectile), attackPoint3.transform.position, playerCamera.transform.rotation);
+        Rigidbody _projectileRB = _projectile.GetComponent<Rigidbody>();
+        Vector3 forceToAdd = playerCamera.transform.forward * shootForce + transform.up * shootUpwardForce;
+        _projectileRB.AddForce(forceToAdd, ForceMode.Impulse);
+        totalKnives--;
+        Invoke(nameof(ResetKnife), shootCooldown);
+        attackPoint3.SetActive(false);
+    }
+    public void shootKnife4()
+    {
+        readyToThrow = false;
+        GameObject _projectile = Instantiate((knifeProjectile), attackPoint4.transform.position, playerCamera.transform.rotation);
+        Rigidbody _projectileRB = _projectile.GetComponent<Rigidbody>();
+        Vector3 forceToAdd = playerCamera.transform.forward * shootForce + transform.up * shootUpwardForce;
+        _projectileRB.AddForce(forceToAdd, ForceMode.Impulse);
+        totalKnives--;
+        Invoke(nameof(ResetKnife), shootCooldown);
+        attackPoint4.SetActive(false);
+    }
+    public void shootKnife5()
+    {
+        readyToThrow = false;
+        GameObject _projectile = Instantiate((knifeProjectile), attackPoint5.transform.position, playerCamera.transform.rotation);
+        Rigidbody _projectileRB = _projectile.GetComponent<Rigidbody>();
+        Vector3 forceToAdd = playerCamera.transform.forward * shootForce + transform.up * shootUpwardForce;
+        _projectileRB.AddForce(forceToAdd, ForceMode.Impulse);
+        totalKnives--;
+        Invoke(nameof(ResetKnife), shootCooldown);
+        attackPoint5.SetActive(false);
+    }
+    public void ScatterShot()
+    {
+        readyToThrow = false;
+        GameObject _projectile1 = Instantiate((knifeProjectile), attackPoint1.transform.position, playerCamera.transform.rotation);
+        GameObject _projectile2 = Instantiate((knifeProjectile), attackPoint2.transform.position, playerCamera.transform.rotation);
+        GameObject _projectile3 = Instantiate((knifeProjectile), attackPoint3.transform.position, playerCamera.transform.rotation);
+        GameObject _projectile4 = Instantiate((knifeProjectile), attackPoint4.transform.position, playerCamera.transform.rotation);
+        GameObject _projectile5 = Instantiate((knifeProjectile), attackPoint5.transform.position, playerCamera.transform.rotation);
+        Rigidbody _projectileRB1 = _projectile1.GetComponent<Rigidbody>();
+        Rigidbody _projectileRB2 = _projectile2.GetComponent<Rigidbody>();
+        Rigidbody _projectileRB3 = _projectile3.GetComponent<Rigidbody>();
+        Rigidbody _projectileRB4 = _projectile4.GetComponent<Rigidbody>();
+        Rigidbody _projectileRB5 = _projectile5.GetComponent<Rigidbody>();
+        Vector3 forceToAdd = playerCamera.transform.forward * shootForce + transform.up * shootUpwardForce;
+        _projectileRB1.AddForce(forceToAdd, ForceMode.Impulse);
+        _projectileRB2.AddForce(forceToAdd, ForceMode.Impulse);
+        _projectileRB3.AddForce(forceToAdd, ForceMode.Impulse);
+        _projectileRB4.AddForce(forceToAdd, ForceMode.Impulse);
+        _projectileRB5.AddForce(forceToAdd, ForceMode.Impulse);
+        totalKnives = 0;
+        Invoke(nameof(ResetKnife), shootCooldown);
+        attackPoint1.SetActive(false);
+        attackPoint2.SetActive(false);
+        attackPoint3.SetActive(false);
+        attackPoint4.SetActive(false);
+        attackPoint5.SetActive(false);
+    }
+
+    public void ResetKnife()
+    {
+        readyToThrow = true;
+    }
+    public void MoreKnives()
+    {
+        totalKnives = 5;
     }
     #endregion
 }
